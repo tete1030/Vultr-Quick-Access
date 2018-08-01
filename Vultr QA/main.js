@@ -1,4 +1,4 @@
-let VERSION = $app.info.version;
+const VERSION = "1.0.0";
 let vultrapi = require("scripts/vultrapi");
 let mainview = require("scripts/mainview");
 let apikey = require("scripts/apikey");
@@ -21,12 +21,14 @@ async function resetAPIKey() {
 
 async function checkUpdate() {
     let resp = await $http.get("https://github.com/tete1030/Vultr-Quick-Access/raw/master/release/version.json");
-    if (resp.error !== null) {
+    if (resp.error === null) {
         let versionInfo = resp.data;
-        if (versionInfo.version != VERSION) {
+        console.log("Current version: " + VERSION);
+        console.log("Remote version: " + versionInfo.version);
+        if (versionInfo.version !== VERSION) {
             let confirm = await $ui.alert({
                 title: "Update",
-                message: "A new version detected:\n" + versionInfo.log + "\n\nProceed updating?",
+                message: "A new version detected: " + versionInfo.version + "\n" + versionInfo.log + "\n\nProceed updating?",
                 actions: ["OK", "Cancel"]
             });
             console.log("Alert result = " + confirm.title);
@@ -38,6 +40,10 @@ async function checkUpdate() {
             $app.openURL("jsbox://install?name=" + encodeURIComponent($addin.current.name) + "&url=" + encodeURIComponent(url));
             $app.close();
         }
+    } else {
+        console.error("Error while update: \n" + 
+                      `error = {code: ${resp.error.code}, domain: ${resp.error.domain}, localizedDescription: ${resp.error.localizedDescription}}\n` + 
+                      `resp.data = ${resp.data}`);
     }
 }
 
